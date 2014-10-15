@@ -47,6 +47,22 @@ namespace RoslynHeapAllocations
             }
         }
 
+        public static string SequencePointToString(SequencePoint location)
+        {
+            if (location == null)
+                return String.Empty;
+
+            if (location.StartLine == CodeGenerationHelper.HiddenLocation &&
+                location.EndLine == CodeGenerationHelper.HiddenLocation)
+            {
+                return " @ HIDDEN (0xfeefee)";
+            }
+
+            return string.Format(" @ {0},{1} -> {2},{3}",
+                location.StartLine.ToString(), location.StartColumn.ToString(),
+                location.EndLine.ToString(), location.EndColumn.ToString());
+        }
+
         private static void PrintILInstructions(
                             Dictionary<string, Collection<Instruction>> ilInstructions,
                             ConsoleColor origColour)
@@ -131,19 +147,6 @@ namespace RoslynHeapAllocations
                 //}
                 //Console.ForegroundColor = origColour;
             }
-        }
-
-        private static string SequencePointToString(SequencePoint location)
-        {
-            if (location == null)
-                return String.Empty;
-
-            if (location.StartLine == CodeGenerationHelper.HiddenLocation && location.EndLine == CodeGenerationHelper.HiddenLocation)
-                return " @ HIDDEN (0xfeefee)";
-
-            return string.Format(" @ {0},{1} -> {2},{3}",
-                location.StartLine.ToString(), location.StartColumn.ToString(),
-                location.EndLine.ToString(), location.EndColumn.ToString());
         }
     }
 }

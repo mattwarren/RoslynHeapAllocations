@@ -3,12 +3,15 @@ using System.Text;
 
 namespace RoslynHeapAllocations
 {
-    internal static class StringBuilderCache
+    // "Borrowed" from the Roslyn code-base
+    // The BCL one seems to be tailored fro a different scenarion (smaller string)
+    // http://referencesource.microsoft.com/#mscorlib/system/text/stringbuildercache.cs
+    public static class StringBuilderCache
     {
         [ThreadStatic]
         private static StringBuilder cachedStringBuilder;
 
-        internal static StringBuilder AcquireBuilder()
+        public static StringBuilder AcquireBuilder()
         {
             StringBuilder result = cachedStringBuilder;
             if (result == null)
@@ -20,12 +23,11 @@ namespace RoslynHeapAllocations
             return result;
         }
 
-        internal static string GetStringAndReleaseBuilder(StringBuilder sb)
+        public static string GetStringAndReleaseBuilder(StringBuilder sb)
         {
             string result = sb.ToString();
             cachedStringBuilder = sb;
             return result;
         }
-
     }
 }

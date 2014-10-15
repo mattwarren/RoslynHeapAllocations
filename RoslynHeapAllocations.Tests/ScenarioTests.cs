@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +16,7 @@ namespace RoslynHeapAllocations.Tests
     {
         private static readonly ILCodeGroupComparer ILCodeGroupComparer = new ILCodeGroupComparer();
 
-        public List<ILCodeGroup> RunTest(string script)
+        public List<ILCodeGroup> RunTest(string script, string codeLocation = null, bool saveDLLForDebugging = false)
         {
             var origColour = Console.ForegroundColor;
 
@@ -33,6 +34,7 @@ namespace RoslynHeapAllocations.Tests
                 new MetadataFileReference(typeof(System.Console).Assembly.Location),
                 new MetadataFileReference(typeof(System.Linq.Enumerable).Assembly.Location),
                 new MetadataFileReference(typeof(System.Collections.Generic.IList<>).Assembly.Location),
+                new MetadataFileReference(typeof(DefaultParameterValueAttribute).Assembly.Location),
             };
 
             var compilationCreateTimer = Stopwatch.StartNew();
@@ -61,8 +63,10 @@ namespace RoslynHeapAllocations.Tests
             var processingTimer = Stopwatch.StartNew();
             var ilInstructions = CodeGenerationHelper.GetILInstructionsFromAssembly(assembly);
 
-            var scriptCodeLocation = "System.Void Script::.ctor()";
-            if (ilInstructions.Count == 0 || ilInstructions.ContainsKey(scriptCodeLocation) == false)
+            var scriptCodeLocation = codeLocation ?? "System.Void Script::.ctor()";
+            if (saveDLLForDebugging || 
+                ilInstructions.Count == 0 || 
+                ilInstructions.ContainsKey(scriptCodeLocation) == false)
             {
                 // Write them to disk for debugging
                 var name = "Test-" + DateTime.Now.Ticks.ToString();

@@ -77,18 +77,15 @@ namespace RoslynHeapAllocations.Tests
             AssertEx.ResultsContainAllocationType(results, AllocationType.Boxing, expectedLineNumber: 2);
         }
 
-        [Fact(Skip = "Code sample doesn't compile in Roslyn (possible bug?), can't find DefaultParameterValue")]
+        [Fact]
         public void Optional_parameters_of_object_type_with_value_type_default_values()
         {
             var @script =
                 @"using System.Runtime.InteropServices;
                 void M([Optional, DefaultParameterValue(42)] object o) {}
-                //void M([DefaultParameterValue(42)] object o) {}
-                //void M([System.Runtime.InteropServices.Optional, System.Runtime.InteropServices.DefaultParameterValue(42)] object o) {}
                 M(); // boxing at call-site";
             var results = RunTest(script);
             AssertEx.ResultsContainAllocationType(results, AllocationType.Boxing, expectedLineNumber: 3);
-            AssertEx.ResultsContainAllocationType(results, AllocationType.Boxing, expectedLineNumber: 4);
         }
     }
 }

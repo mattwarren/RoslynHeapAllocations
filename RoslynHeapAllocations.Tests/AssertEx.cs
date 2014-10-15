@@ -38,7 +38,7 @@ namespace RoslynHeapAllocations.Tests
                                                        r.Allocation == expectedAllocationType)
                     .ToList();
                 var msg = string.Format(
-                    "Expected results to contain {0} occurences of \"AllocationType.{1}\" on line {2}, instead got {3} :[{4}]",
+                    "Expected results to contain {0} occurrences of \"AllocationType.{1}\" on line {2}, instead got {3} :[{4}]",
                     expectedOccurencesOnLine,
                     expectedAllocationType,
                     expectedLineNumber,

@@ -8,7 +8,7 @@ namespace RoslynHeapAllocations
     internal static class AllocationDetector
     {
         /// <summary>
-        /// Verf good reference http://stackoverflow.com/questions/7995606/boxing-occurrence-in-c-sharp
+        /// Very good reference http://stackoverflow.com/questions/7995606/boxing-occurrence-in-c-sharp
         /// and http://msdn.microsoft.com/en-us/magazine/cc163930.aspx
         /// Also see http://stackoverflow.com/questions/1381370/hidden-boxing-in-the-bcl/1382033#1382033
         /// and http://blogs.msdn.com/b/ricom/archive/2007/01/26/performance-quiz-12-the-cost-of-a-good-hash-solution.aspx
@@ -85,12 +85,16 @@ namespace RoslynHeapAllocations
                 //TODO this isn't the right check, I think we need to check if the MoveNext is called on a Value Type (i.e. if what GetEnumerator returned)
             }
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            else if (method.FullName.Contains("System.Object::GetHashCode()") &&
+            else if ((method.FullName.Contains("System.Object::GetHashCode()") ||
+                      method.FullName.Contains("System.Object::ToString()") ||
+                      method.FullName.Contains("System.Object::Equals(System.Object)")) &&
                      constrainedTypeDefinition != null)
 // ReSharper restore ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
             {
-                var isGetHashCodeOverridden = DetectGetHashCodeOverridden(constrainedTypeDefinition, method.ReturnType);
+                var isGetHashCodeOverridden = DetectGetHashCodeOverridden(constrainedTypeDefinition,
+                                                                                method.FullName,
+                                                                                method.ReturnType);
                 if (isGetHashCodeOverridden == false)
                     return AllocationType.Boxing;
             }
@@ -98,7 +102,7 @@ namespace RoslynHeapAllocations
             return AllocationType.None;
         }
 
-        private static bool DetectGetHashCodeOverridden(TypeDefinition constrainedTypeDefinition, TypeReference expectedReturnType)
+        private static bool DetectGetHashCodeOverridden(TypeDefinition constrainedTypeDefinition, string expectedMethodName, TypeReference expectedReturnType)
         {
             //TestingResharperMemoryPlugin.cs:34 Boxing allocation: inherited System.Object virtual method call on value type instance
             // From http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.constrained(v=vs.110).aspx
@@ -111,7 +115,8 @@ namespace RoslynHeapAllocations
 
             foreach (var methodDefinition in constrainedTypeDefinition.Methods)
             {
-                if (methodDefinition.Name == "GetHashCode" &&
+                //if ((methodDefinition.Name == "GetHashCode" || methodDefinition.Name == "ToString") &&
+                if (expectedMethodName.Contains(methodDefinition.Name) &&
                     methodDefinition.Parameters.Count == 0 &&
                     methodDefinition.IsConstructor == false &&
                     methodDefinition.IsPublic &&

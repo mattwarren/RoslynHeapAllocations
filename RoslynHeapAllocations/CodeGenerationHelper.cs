@@ -7,15 +7,15 @@ using System.Collections.Generic;
 
 namespace RoslynHeapAllocations
 {
-    internal static class CodeGenerationHelper
+    public static class CodeGenerationHelper
     {
         // See http://mono.1490590.n4.nabble.com/Trouble-with-SequencePoint-td1550909.html#a1550910
         // and http://blogs.msdn.com/b/jmstall/archive/2005/06/19/feefee-sequencepoints.aspx
-        internal static readonly int HiddenLocation = 16707566;
+        public static readonly int HiddenLocation = 16707566;
 
         private static readonly ILCodeGroupComparer ILCodeGroupComparer = new ILCodeGroupComparer();
 
-        internal static Dictionary<string, Collection<Instruction>> GetILInstructionsFromAssembly(AssemblyDefinition assembly)
+        public static Dictionary<string, Collection<Instruction>> GetILInstructionsFromAssembly(AssemblyDefinition assembly)
         {
             // Probably need to do this properly, i.e.
             // For each Type inside assembly, in those look for methods, etc
@@ -53,7 +53,7 @@ namespace RoslynHeapAllocations
             return ilInstructions;
         }
 
-        internal static List<ILCodeGroup> ProcessIL(Dictionary<string, Collection<Instruction>> ilInstructions, TextLineCollection allLines)
+        public static List<ILCodeGroup> ProcessIL(Dictionary<string, Collection<Instruction>> ilInstructions, TextLineCollection allLines)
         {
             var items = new List<ILCodeGroup>();
             foreach (var pair in ilInstructions)
@@ -86,8 +86,8 @@ namespace RoslynHeapAllocations
                         for (int i = location.StartLine - 1; i < location.EndLine; i++)
                         {
                             var line = allLines[i];
-                            stringBuilder.AppendFormat("[{0,4}] {1}{2}", (line.LineNumber + 1).ToString(), line.ToString(),
-                                Environment.NewLine);
+                            stringBuilder.AppendFormat("[{0,4}] {1}{2}", 
+                                        (line.LineNumber + 1).ToString(), line.ToString(), Environment.NewLine);
                         }
 
                         stringBuilder.AppendFormat("{0}{1}",
